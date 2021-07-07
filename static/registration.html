@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign Up</title>
+</head>
+<body>
+  <h1>Registration</h1>
+  <form id="registration-form" action="">
+    <input type="text" name="" id="username" placeholder="Username">
+    <input type="password" name="" id="password" placeholder="Password">
+
+    <button type="submit">Submit</button>
+  </form>
+
+  <style>
+    body {
+      background-color: moccasin;
+    }
+  </style>
+
+  <script>
+    const form = document.querySelector('#registration-form')
+
+    form.addEventListener('submit', registerTheUser)
+
+    async function registerTheUser(event) {
+      event.preventDefault()
+
+      const username = document.querySelector('#username').value
+      const password = document.querySelector('#password').value
+
+      const serverResponse = await fetch('/api/register', {
+        method: 'post',
+        headers: {
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          username, 
+          password
+        })
+      }).then((res) => console.log(res))
+
+      console.log(serverResponse)
+    } 
+  </script>
+</body>
+</html>
