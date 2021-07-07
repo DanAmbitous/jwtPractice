@@ -15,64 +15,63 @@ mongoose.connect('mongodb://localhost:27017/loginApp', {
   useCreateIndex: true
 })
 
+//To get the library of body-parser
 const bodyParse = require('body-parser')
 
+//So the body-parser would be used as a middleware in order to parse the body property from the client
 app.use(bodyParse.json())
 
+//To server the static files, which are all within the static folder
 app.use('/', express.static(path.join(__dirname, 'static')))
 
-app.post('/api/login', async (req, res) => {
-  const {username, password} = req.body
+//To see the documents (records) from the User model (the db)
+app.get('/api/register', async (req, res) => {
+  const userSchema = await User.find({})
 
-  const user = await User.findOne({username}).lean()
-
-  if (!user) {
-    return res.json({status: 'error', error: `The username and/or password are invalid ${user.username, user.password}`})
-  }
-
-  if (await bcrypt.compare(password, user.password)) {
-    // The username & password are valid
-
-    const token = jwt.sign({id: user._id, username: user.username}, process.env.JWT_SECRET)
-
-    return res.json({status: 'ok', data: token})
-  }
-
-  res.json({status: 'error', error: `The username and/or password are invalid`})
+  res.send(userSchema)
 })
 
+//To clear the User db
+app.delete('/api/register', async (req, res) => {
+  await User.deleteMany()
+
+  res.send('Cleared the Database')
+})
+
+
+//Endpoint for the register file in the static folder
 app.post('/api/register', async (req, res) => {
   const {username, password} = req.body
-  const bcryptedPassword = await bcrypt.hash(password, 10)
 
-  try {
-    if (username.length < 3 || typeof username != 'string') {
-      return res.send(`Username of ${username} is invalid`)
-    }
+  const saltRounds = 10
 
-    if (password.length < 5 || typeof password != 'string') {
-      return res.send('Password is invalid')
-    }
+  bcrypt.genSalt(saltRounds, (req, salt) => {
+    bcrypt.hash(password, salt, async (error, hashedPassword) => {
+      if (error) {
+        throw error
+      } else {
+        try {
+          const user = await User.create({
+            username,
+            password: hashedPassword
+          })
 
-    const userCreated = await User.create({
-      username: username,
-      password: bcryptedPassword
+          console.log(user)
+        } catch (error) {
+          if (error.code === 11000) {
+            console.log(`Username of ${username} already exists`)
+
+            return res.json({status: 'error', message: `Username of ${username} already exists`})
+          }
+
+          throw error
+        }
+      }
     })
+  })
 
-    console.log(`The user has been created successfully ${userCreated}`)
-
-    res.status(200).json("All good!")
-  } catch (error) {
-    if (error.code === 11000) {
-      console.log(`The username of ${username} already exists`)
-
-      return res.send(`The username of ${username} already exists`)
-    }
-
-    res.json({status: 'error'})
-
-    throw `ERROR: ${error}`
-  }
+  res.json({status: `ok`})
 })
 
+//To run the server
 app.listen(PORT, () => console.log(`Server is running on port ${PORT}`))

@@ -4,15 +4,16 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sign Up</title>
+  <title>Registration</title>
 </head>
 <body>
   <h1>Registration</h1>
-  <form id="registration-form" action="">
-    <input type="text" name="" id="username" placeholder="Username">
-    <input type="password" name="" id="password" placeholder="Password">
 
-    <button type="submit">Submit</button>
+  <form action="" id="form">
+    <input type="text" name="username" id="username" placeholder="username">
+    <input type="text" name="password" id="password" placeholder="password">
+
+    <input type="submit" value="Submit" id="submit">
   </form>
 
   <style>
@@ -22,17 +23,15 @@
   </style>
 
   <script>
-    const form = document.querySelector('#registration-form')
+    const form = document.querySelector('#form')
 
-    form.addEventListener('submit', registerTheUser)
-
-    async function registerTheUser(event) {
+    async function formSubmission(event) {
       event.preventDefault()
 
       const username = document.querySelector('#username').value
       const password = document.querySelector('#password').value
 
-      const serverResponse = await fetch('/api/register', {
+      const result = await fetch('/api/register', {
         method: 'post',
         headers: {
           'content-type': 'application/json'
@@ -41,11 +40,16 @@
           username, 
           password
         })
-      }).then((res) => console.log(res))
+      }).then(res => res.json())
+    }
 
-      console.log(serverResponse)
-      alert('Success')
-    } 
+    document.addEventListener('click', event => {
+      switch (event.target.id) {
+        case "submit":
+          formSubmission(event)
+          break
+      }
+    })
   </script>
 </body>
 </html>
