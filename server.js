@@ -24,22 +24,21 @@ app.use('/', express.static(path.join(__dirname, 'static')))
 app.post('/api/login', async (req, res) => {
   const {username, password} = req.body
 
-  //lean() returns a simple JSON representation of the document
-  const user = User.findOne({username: username}).lean()
+  const user = await User.findOne({username}).lean()
 
   if (!user) {
-    return res.json({status: 'error', error: 'Invalid username or password'})
+    return res.json({status: 'error', error: `The username and/or password are invalid ${user.username, user.password}`})
   }
 
   if (await bcrypt.compare(password, user.password)) {
-    // Username and the password are valid
+    // The username & password are valid
 
     const token = jwt.sign({id: user._id, username: user.username}, process.env.JWT_SECRET)
 
-    return res.json({status: 'ok', data: 'Valid credentials'})
+    return res.json({status: 'ok', data: token})
   }
 
-  res.json({status: 'error', data: 'Invalid username or password'})
+  res.json({status: 'error', error: `The username and/or password are invalid`})
 })
 
 app.post('/api/register', async (req, res) => {

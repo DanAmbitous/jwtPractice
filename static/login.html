@@ -43,6 +43,8 @@
         })
       }).then((res) => console.log(res))
 
+      console.log(`ERROR: ${serverResponse}`)
+
       if (serverResponse.status === 'ok') {
         console.log(`Got the token: ${serverResponse.data}`)
         alert('success')
